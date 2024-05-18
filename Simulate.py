@@ -93,6 +93,7 @@ class Simulation():
                             if rs.qk == reservation_station.name:
                                 rs.vk = self.common_data_bus.value
                                 rs.qk = None
+
             flagbr = False
             # FETCH Function
             for instruction in self.instruction_queue.instructions:
