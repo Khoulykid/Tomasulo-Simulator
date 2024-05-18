@@ -70,6 +70,8 @@ class InstructionQueue:
         # i don't know the behavior of the lists in python 
 
         return self.instructions.pop(0) if self.instructions else None
+    def empty(self):
+        return len(self.instructions) == 0
 
     def print_instructions(self):
         for instruction in self.instructions:
