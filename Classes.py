@@ -13,7 +13,7 @@ class ReservationStation:
 
 
     def print_reservation_station(self):
-        print(f"{self.name}: {self.busy}, {self.op.operation}, {self.vj}, {self.vk}, {self.qj}, {self.qk}, {self.dest}, {self.a}, {self.op.execution_time}") # Ali: remove dest and remaining time at the end  
+        print(f"{self.name}: {self.busy}, {self.op.operation}, {self.vj}, {self.vk}, {self.qj}, {self.qk}, {self.a}") # 
 
 class FunctionalUnit: 
     def __init__(self, operation, execution_time):
@@ -35,6 +35,9 @@ class FunctionalUnit:
                 self.result = 1
             else:
                 self.result = 0
+        elif self.operation == 'LD':
+            self.result = self.operand1 + self.operand2
+        
         # Ali: add other operations here. 
         # Take care that Load/Store have address computations that should be written in reservation stations. 
         # make sure to solve the issue where there's two things writing to the same address 

@@ -59,7 +59,7 @@ class Simulation():
                         if rs.qk == reservation_station.name:
                             rs.vk = self.common_data_bus.value
                             rs.qk = None
-
+            flagbr = False
             # FETCH Function
             for instruction in self.instruction_queue.instructions:
                 for reservation_station in self.reservation_stations:
@@ -90,7 +90,10 @@ class Simulation():
                                         reservation_station.qk = self.register_file.status[src2_index].Qi
                             dest_index = int(instruction.dest[1:])  # Convert register name to index
                             self.register_file.status[dest_index].Qi = reservation_station.name
+                            flagbr = True
                             break
+                if flagbr: break 
+                
 
             output = io.StringIO()
             sys.stdout = output
