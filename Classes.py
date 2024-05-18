@@ -1,4 +1,4 @@
-from array import array
+import numpy as np
 class ReservationStation:
     def __init__(self, name=None, op=None, execution_time=None):
         self.name = name
@@ -109,7 +109,7 @@ class RegisterStatus:
 class Memory: # Ali: do the initialization of the memory and check the size of the memory 
                 # it should be 128kb and word addressable where each word is 16-bit 
     def __init__(self, size):
-        self.data = array('h', [0] * (size*1000 // 16))
+        self.data = np.zeros(size*1000//16, dtype=np.int16)
 
     def load(self, address):
         if 0 <= address < len(self.data):
