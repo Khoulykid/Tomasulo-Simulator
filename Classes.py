@@ -1,3 +1,4 @@
+from array import array
 class ReservationStation:
     def __init__(self, name=None, op=None, execution_time=None):
         self.name = name
@@ -29,6 +30,8 @@ class FunctionalUnit:
             self.result = ~(self.operand1 & self.operand2)
         elif self.operation == 'ADD' or self.operation == 'ADDI':
             self.result = self.operand1 + self.operand2
+        # elif self.operation == 'BEQ':
+        #     if
         # Ali: add other operations here. 
         # Take care that Load/Store have address computations that should be written in reservation stations. 
         # make sure to solve the issue where there's two things writing to the same address 
@@ -106,10 +109,16 @@ class RegisterStatus:
 class Memory: # Ali: do the initialization of the memory and check the size of the memory 
                 # it should be 128kb and word addressable where each word is 16-bit 
     def __init__(self, size):
-        self.data = [0] * size
+        self.data = array('h', [0] * (size*1000 // 16))
 
     def load(self, address):
-        return self.data[address]
+        if 0 <= address < len(self.data):
+            return self.data[address]
+        else:
+            raise IndexError("Address out of range")
 
     def store(self, address, value):
-        self.data[address] = value
+        if 0 <= address < len(self.data):
+            self.data[address] = value
+        else:
+            raise IndexError("Address out of range")

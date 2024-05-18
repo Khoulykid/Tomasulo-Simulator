@@ -14,7 +14,7 @@ def simulate():
     common_data_bus = CommonDataBus()
     instruction_queue = InstructionQueue()
     register_file = RegisterFile(8)
-    memory = Memory(1024) # Ali: i totally disregarded the memory here 
+    memory = Memory(128) # Ali: i totally disregarded the memory here 
 
     cycles = 0
     while True:
