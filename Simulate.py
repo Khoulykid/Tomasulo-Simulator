@@ -5,7 +5,7 @@ class Simulation():
     def __init__(self, InstructionQueue):
         self.cycles = 0
         self.reservation_stations = [
-            ReservationStation('LOAD'+str(i+1), 'LOAD', 6) for i in range(2)] + \
+            ReservationStation('LD'+str(i+1), 'LD', 6) for i in range(2)] + \
             [ReservationStation('STORE', 'STORE', 6)] + \
             [ReservationStation('BEQ', 'BEQ', 1)] + \
             [ReservationStation('CALL/RET', 'CALL/RET', 1)] + \
@@ -43,22 +43,56 @@ class Simulation():
                         reservation_station.op.execution_time -= 1
                         string += f"Executing {reservation_station.op.operation} in {reservation_station.name}\n"
                         string += f"Execution time remaining: {reservation_station.op.execution_time}\n"
+                        if reservation_station.op.operation == 'LD': 
+                            if reservation_station.op.execution_time == 4:
+                                reservation_station.a = reservation_station.op.result
+                        if reservation_station.op.operation == 'SD': 
+                            if reservation_station.op.execution_time == 4:
+                                reservation_station.a = reservation_station.op.result
                 elif reservation_station.busy and not self.common_data_bus.busy:
                     # Writeback Function
                     self.common_data_bus.busy = True
                     string += f"Writing back {reservation_station.op.operation} in {reservation_station.name}\n"
                     string += f"Result: {reservation_station.op.result}\n"
-                    self.common_data_bus.value = reservation_station.op.result
-                    self.register_file.status[reservation_station.dest].Qi = None
-                    self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value  # Update register file value
-                    reservation_station.busy = False
-                    for rs in self.reservation_stations:
-                        if rs.qj == reservation_station.name:
-                            rs.vj = self.common_data_bus.value
-                            rs.qj = None
-                        if rs.qk == reservation_station.name:
-                            rs.vk = self.common_data_bus.value
-                            rs.qk = None
+                    
+                    if reservation_station.op.operation == 'LD':
+                        self.common_data_bus.value = self.memory.load(reservation_station.a)
+                        self.register_file.status[reservation_station.dest].Qi = None
+                        if reservation_station.dest != 0:  
+                            self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value  # Update register file value
+                        reservation_station.busy = False
+                        for rs in self.reservation_stations:
+                            if rs.qj == reservation_station.name:
+                                rs.vj = self.common_data_bus.value
+                                rs.qj = None
+                            if rs.qk == reservation_station.name:
+                                rs.vk = self.common_data_bus.value
+                                rs.qk = None
+                    elif reservation_station.op.operation == 'SD':
+                        self.common_data_bus.value = self.register_file.registers[reservation_station.dest].value
+                        self.register_file.status[reservation_station.dest].Qi = None
+                        self.memory.store(reservation_station.a,self.common_data_bus.value)   # Update register file value
+                        reservation_station.busy = False
+                        for rs in self.reservation_stations:
+                            if rs.qj == reservation_station.name:
+                                rs.vj = self.common_data_bus.value
+                                rs.qj = None
+                            if rs.qk == reservation_station.name:
+                                rs.vk = self.common_data_bus.value
+                                rs.qk = None
+                    else: 
+                        self.common_data_bus.value = reservation_station.op.result
+                        self.register_file.status[reservation_station.dest].Qi = None
+                        if reservation_station.dest != 0:  # Replace non-standard character with a colon
+                            self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value  # Update register file value
+                        reservation_station.busy = False
+                        for rs in self.reservation_stations:
+                            if rs.qj == reservation_station.name:
+                                rs.vj = self.common_data_bus.value
+                                rs.qj = None
+                            if rs.qk == reservation_station.name:
+                                rs.vk = self.common_data_bus.value
+                                rs.qk = None
             flagbr = False
             # FETCH Function
             for instruction in self.instruction_queue.instructions:
@@ -97,7 +131,9 @@ class Simulation():
 
             output = io.StringIO()
             sys.stdout = output
+            
             # Print Functions
+            print(f"Cycle {self.cycles}:")
             self.instruction_queue.print_instructions()
             
             self.register_file.print_registers()
