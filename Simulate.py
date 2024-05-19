@@ -50,7 +50,8 @@ class Simulation():
                     string += f"Result: {reservation_station.op.result}\n"
                     self.common_data_bus.value = reservation_station.op.result
                     self.register_file.status[reservation_station.dest].Qi = None
-                    self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value  # Update register file value
+                    if reservation_station.dest != 0:
+                        self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value  # Update register file value
                     reservation_station.busy = False
                     for rs in self.reservation_stations:
                         if rs.qj == reservation_station.name:
