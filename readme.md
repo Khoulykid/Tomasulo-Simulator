@@ -1,3 +1,8 @@
+# Tomasulo's Simulator
+
+#### This is a program that simulates Tomasulo's algorithm on some simple instructions.
+
+##### Instructions are mentioned in the report.
 ## Names & IDs
 Ali Elkhouly &nbsp;&nbsp;&nbsp; 900212679
 
