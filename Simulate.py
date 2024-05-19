@@ -58,7 +58,7 @@ class Simulation():
                         if reservation_station.op.operation == 'SD': 
                             if reservation_station.op.execution_time == 4:
                                 reservation_station.a = reservation_station.op.result
-                elif reservation_station.busy and not self.common_data_bus.busy:
+                elif reservation_station.busy and not self.common_data_bus.busy and reservation_station.op.execution_time == 0:
                     # Writeback Function
                     self.common_data_bus.busy = True
                     string += f"Writing back {reservation_station.op.operation} in {reservation_station.name}\n"
@@ -133,8 +133,8 @@ class Simulation():
                     else: 
                         self.common_data_bus.value = reservation_station.op.result
                         self.register_file.status[reservation_station.dest].Qi = None
-                        if reservation_station.dest != 0:  # Replace non-standard character with a colon
-                            self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value  # Update register file value
+                        if reservation_station.dest != 0:  
+                            self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value 
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
