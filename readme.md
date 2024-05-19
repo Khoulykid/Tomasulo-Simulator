@@ -21,3 +21,7 @@ All instructions, but did not test thoroughly on them.
 Did not check on all instructions thoroughly.
 
 We assumed 2 stations for RET and CALL
+
+CALL does not work properly.
+
+No Flushing.
