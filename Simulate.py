@@ -83,7 +83,16 @@ class Simulation():
                                 rs.qk = None
                     elif reservation_station.op.operation == 'BEQ':
                         self.common_data_bus.value = reservation_station.op.result
-                        self.instruction_queue.jump(reservation_station.vk + 1 + self.instruction_queue.current_index)
+                        self.instruction_queue.jump(reservation_station.vk + 1 + reservation_station.qk)
+                        print(reservation_station.vk + 1 + reservation_station.qk)
+                        reservation_station.busy = False
+                        for rs in self.reservation_stations:
+                            if rs.qj == reservation_station.name:
+                                rs.vj = self.common_data_bus.value
+                                rs.qj = None
+                            if rs.qk == reservation_station.name:
+                                rs.vk = self.common_data_bus.value
+                                rs.qk = None
                     elif reservation_station.op.operation == 'RET':
                         self.common_data_bus.value = self.register_file.registers[reservation_station.dest].value
                         self.register_file.status[reservation_station.dest].Qi = None
@@ -97,7 +106,7 @@ class Simulation():
                                 rs.vk = self.common_data_bus.value
                                 rs.qk = None
                     elif reservation_station.op.operation == 'CALL':
-                        self.common_data_bus.value = self.instruction_queue.current_index# Ali: ALLLLIIIIIIIIIIIIIIIII
+                        self.common_data_bus.value = reservation_station.qj + 1# Ali: ALLLLIIIIIIIIIIIIIIIII
                         self.register_file.registers[1] = self.common_data_bus.value
                         self.register_file.status[reservation_station.dest].Qi = None
                         self.instruction_queue.jump(self.register_file.registers[reservation_station.vj].value)
@@ -127,8 +136,7 @@ class Simulation():
             # FETCH Function
             for instruction in self.instruction_queue.instructions:
                 for reservation_station in self.reservation_stations:
-                    if reservation_station.op.operation == 'BEQ' and reservation_station.op.result == 1:
-                        self.instruction_queue.jump(reservation_station.vk)
+
                     if reservation_station.op.operation == instruction.op or (reservation_station.op.operation == 'ADD' and instruction.op == 'ADDI'):
                         if not reservation_station.busy:
                             self.instruction_queue.dequeue(instruction)
@@ -143,6 +151,14 @@ class Simulation():
                                 reservation_station.qj = self.register_file.status[src1_index].Qi
                             if instruction.op == 'BEQ':
                                 reservation_station.vk = int(instruction.src2)  # Treat src2 as an immediate value
+                                reservation_station.qk = self.instruction_queue.current_index
+                            if instruction.op == 'CALL':
+                                reservation_station.vj = 1
+                                reservation_station.qj = self.instruction_queue.current_index
+                                reservation_station.vk = int(instruction.src1)
+                            if instruction.op == 'RET':
+                                reservation_station.vj = 1
+                                reservation_station.qj = self.instruction_queue.current_index
                             elif instruction.src2 is not None:
                                 if instruction.src2.isnumeric():
                                     reservation_station.vk = int(instruction.src2)

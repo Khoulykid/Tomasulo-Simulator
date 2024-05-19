@@ -19,8 +19,12 @@ class GUI:
             
             if len(R) == 3:
                 instruction = Instruction(inst, R[0], R[1], R[2])
-            else:
+            elif len(R) == 2:
                 instruction = Instruction(inst, R[0], R[1])
+            elif len(R) == 1:
+                instruction = Instruction(inst, R[0])
+            else:
+                instruction = Instruction(inst)
             self.InstructionQueue.enqueue(instruction)
         self.simulation.set_instruction_queue(self.InstructionQueue)
         
