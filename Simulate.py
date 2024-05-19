@@ -19,6 +19,8 @@ class Simulation():
         self.register_file = RegisterFile(8)
         self.memory = Memory(128)
         self.potato = []
+        self.total_cycles = 0
+        self.IPC = 0
                 
     def set_memory(self, address, value):
         self.memory.store(address, value)
@@ -64,8 +66,9 @@ class Simulation():
                     string += f"Writing back {reservation_station.op.operation} in {reservation_station.name}\n"
                     string += f"Result: {reservation_station.op.result}\n"
                     for instruction in self.potato:
-                                if instruction["ID"] == reservation_station.ID:
-                                    instruction["Write"] = self.cycles
+                        if instruction["ID"] == reservation_station.ID:
+                            instruction["Write"] = self.cycles
+                    
                     
                     
                     if reservation_station.op.operation == 'LD':
@@ -189,7 +192,19 @@ class Simulation():
                             flagbr = True
                             break
                 if flagbr: break 
-                
+            def check_reservation_stations_and_queue(reservation_stations, instruction_queue):
+                for rs in reservation_stations:
+                    if rs.busy:
+                        return False
+                return len(instruction_queue.instructions) == 0
+            
+            if check_reservation_stations_and_queue(self.reservation_stations, self.instruction_queue) and self.total_cycles == 0:
+                self.total_cycles = self.cycles
+                count = 0
+                for i in self.potato:
+                    if i["Write"] is not None:
+                        count += 1
+                self.IPC = count / self.total_cycles
 
             output = io.StringIO()
             sys.stdout = output
@@ -208,7 +223,7 @@ class Simulation():
             
             
             self.cycles += 1
-            return string, self.potato
+            return string, self.potato, self.total_cycles, self.IPC
 
 
         
