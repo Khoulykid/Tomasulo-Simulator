@@ -95,8 +95,9 @@ class Simulation():
                                 rs.qk = None
                     elif reservation_station.op.operation == 'BEQ':
                         self.common_data_bus.value = reservation_station.op.result
-                        self.instruction_queue.jump(1 + reservation_station.a + reservation_station.vk)
-                        print(1 + reservation_station.a)
+                        self.instruction_queue.jump(reservation_station.a + reservation_station.vk)
+                        print(reservation_station.a + reservation_station.vk)
+                        print (reservation_station.a)
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
