@@ -80,6 +80,17 @@ class Simulation():
                             if rs.qk == reservation_station.name:
                                 rs.vk = self.common_data_bus.value
                                 rs.qk = None
+                    elif reservation_station.op.operation == 'BEQ':
+                        self.common_data_bus.value = reservation_station.op.result
+                        self.instruction_queue.jump(reservation_station.vk + 1 + self.instruction_queue.current_index)
+                        reservation_station.busy = False
+                        for rs in self.reservation_stations:
+                            if rs.qj == reservation_station.name:
+                                rs.vj = self.common_data_bus.value
+                                rs.qj = None
+                            if rs.qk == reservation_station.name:
+                                rs.vk = self.common_data_bus.value
+                                rs.qk = None
                     else: 
                         self.common_data_bus.value = reservation_station.op.result
                         self.register_file.status[reservation_station.dest].Qi = None
