@@ -30,8 +30,11 @@ class FunctionalUnit:
             self.result = ~(self.operand1 & self.operand2)
         elif self.operation == 'ADD' or self.operation == 'ADDI':
             self.result = self.operand1 + self.operand2
-        # elif self.operation == 'BEQ':
-        #     if
+        elif self.operation == 'BEQ':
+            if self.operand1 == self.operand2:
+                self.result = 1
+            else:
+                self.result = 0
         # Ali: add other operations here. 
         # Take care that Load/Store have address computations that should be written in reservation stations. 
         # make sure to solve the issue where there's two things writing to the same address 
@@ -56,20 +59,27 @@ class Instruction:
 
 class InstructionQueue: 
     def __init__(self):
+        self.og = []
         self.instructions = [
-            Instruction('ADD', 'R5', 'R0', 'R1'),
-            Instruction('ADD', 'R2', 'R5', 'R4') 
+            # Instruction('ADD', 'R5', 'R0', 'R1'),
+            # Instruction('ADD', 'R2', 'R5', 'R4') 
         ]
 
     def enqueue(self, instruction):
         self.instructions.append(instruction)
+        self.og.append(instruction)
+    
+    def jump(self, index):
+        self.instructions = self.og[index:]
 
-    def dequeue(self): # I'm not sure this this dequeue removes the first instruction or the instruction just fetched 
+    def dequeue(self, instruction):
+        self.instructions.remove(instruction)
+         # I'm not sure this this dequeue removes the first instruction or the instruction just fetched 
         #imagine a scenario where the reservation station is not empty, then i want to fetch the next instruction and dequeue the other instruction 
         # check if the dequeue happens on the correct instruction not the first one
         # i don't know the behavior of the lists in python 
 
-        return self.instructions.pop(0) if self.instructions else None
+        # return self.instructions.pop(0) if self.instructions else None
     def empty(self):
         return len(self.instructions) == 0
 
@@ -79,7 +89,7 @@ class InstructionQueue:
 
 class Register:
     def __init__(self):
-        self.value = None
+        self.value = np.int16(0)
 
 class RegisterFile:
     def __init__(self, size):
@@ -89,7 +99,7 @@ class RegisterFile:
     
     def initialize_registers(self):
         for i, register in enumerate(self.registers):
-            register.value = i # you know the typical R0 = 0, R1 = 1 
+            register.value = np.int16(i) # you know the typical R0 = 0, R1 = 1 
         # Ali: Hardwire the 0 to 0 
         
     def print_registers(self):

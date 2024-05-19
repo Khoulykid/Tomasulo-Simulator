@@ -1,9 +1,10 @@
 
-from GUI import create_window
+import GUI
+gui = GUI.GUI()
 
 
 
 
 
-create_window()
+gui.create_window()
 # simulate()

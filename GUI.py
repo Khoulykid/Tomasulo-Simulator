@@ -7,22 +7,34 @@ class GUI:
     def __init__(self):
         self.flag = False
         self.InstructionQueue = InstructionQueue()
-        self.simulation = Simulation(CommonDataBus(), self.InstructionQueue)
+        self.simulation = Simulation(self.InstructionQueue)
 
     def divide_instruction(self, text):
         self.flag = True
+        text = text.strip()
         lines = text.split("\n")
-        lines = lines.strip()
         for i in range(len(lines)):
-            inst = lines[i].split(",")
-            if len(inst) == 4:
-                instruction = Instruction(inst[0], inst[1], inst[2], inst[3])
-            else:
-                instruction = Instruction(inst[0], inst[1], inst[2])
-            self.InstructionQueue.enqueue(instruction)
+            inst = lines[i].split(",")[0].split(" ")[0]
+            R = lines[i].replace(inst, "").replace(" ", "").split(",")
             
-
+            if len(R) == 3:
+                instruction = Instruction(inst, R[0], R[1], R[2])
+            else:
+                instruction = Instruction(inst, R[0], R[1])
+            self.InstructionQueue.enqueue(instruction)
+        self.simulation.set_instruction_queue(self.InstructionQueue)
+        self.simulation.instruction_queue.print_instructions()
         
+        
+            
+    def play_pressed(self):
+        if not self.flag:
+            self.divide_instruction(self.inst_field.get("1.0", "end-1c"))
+        string = self.simulation.simulate(self.flag)
+        self.output_field.configure(state="normal")
+        self.output_field.delete("1.0", tk.END)
+        self.output_field.insert(tk.END, string)
+        self.output_field.configure(state="disabled")
     def create_window(self):
         window = tk.Tk()
         window.title("MA")
@@ -32,23 +44,23 @@ class GUI:
         x = int(window.winfo_width() * 0.1)
         y = int(window.winfo_height() * 0.1)
 
-        inst_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
-        inst_field.place(x= x//5, y= y*1.2)
+        self.inst_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
+        self.inst_field.place(x= x//5, y= y*1.2)
 
 
         play_button_img = tk.PhotoImage(file="play.png")
-        play_button = tk.Button(window, image=play_button_img, bg="#1f2a35", command=simulate)
-        play_button.image = play_button_img
-        play_button.place(x= x//5, y= y//1.3)
+        self.play_button = tk.Button(window, image=play_button_img, bg="#1f2a35", command=self.play_pressed, fg="#1f2a35", font=("Arial", 12)) #command= lambda:
+        self.play_button.image = play_button_img
+        self.play_button.place(x= x//5, y= y//1.3)
 
 
-        output_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
-        output_field.place(x= x//5, y= y*4)
-        output_field.configure(state="disabled")
+        self.output_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
+        self.output_field.place(x= x//5, y= y*4)
+        self.output_field.configure(state="disabled")
 
 
-        mem_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
-        mem_field.place(x= x*5, y= y*1.2)
+        self.mem_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
+        self.mem_field.place(x= x*5, y= y*1.2)
 
         label1 = tk.Label(window, text="Instruction Queue", bg="#1f2228", fg="white", font=("Arial", 18))
         label1.place(x= x//2, y= y//1.3)
@@ -59,7 +71,7 @@ class GUI:
         label3 = tk.Label(window, text="Output", bg="#1f2228", fg="white", font=("Arial", 20))
         label3.place(x= x//5, y= y*3.6)
 
-        mem_button = tk.Button(window, image=play_button_img, bg="#1f2a35", fg="white", font=("Arial", 12))
-        mem_button.image = play_button_img
-        mem_button.place(x= x*5, y= y//1.3)
+        self.mem_button = tk.Button(window, image=play_button_img, bg="#1f2a35", fg="white", font=("Arial", 12))
+        self.mem_button.image = play_button_img
+        self.mem_button.place(x= x*5, y= y//1.3)
         window.mainloop()

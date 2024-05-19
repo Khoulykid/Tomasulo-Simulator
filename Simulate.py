@@ -1,7 +1,9 @@
 from Classes import ReservationStation, CommonDataBus, InstructionQueue, RegisterFile, Memory, FunctionalUnit
+import io
+import sys
 class Simulation():
     def __init__(self, InstructionQueue):
-        
+        self.cycles = 0
         self.reservation_stations = [
             ReservationStation('LOAD'+str(i+1), 'LOAD', 6) for i in range(2)] + \
             [ReservationStation('STORE', 'STORE', 6)] + \
@@ -12,9 +14,13 @@ class Simulation():
             [ReservationStation('MUL', 'MUL', 8)
         ]
         self.common_data_bus = CommonDataBus()
-        self.instruction_queue = InstructionQueue()
+        self.instruction_queue = InstructionQueue
         self.register_file = RegisterFile(8)
         self.memory = Memory(128)
+    def set_memory(self, address, value):
+        self.memory.store(address, value)
+    def set_instruction_queue(self, instructions):
+        self.instruction_queue = instructions
 
     
 
@@ -22,8 +28,8 @@ class Simulation():
     def simulate(self, flag):
         if not flag:
             self.cycles = 0
-        if not InstructionQueue.empty():
-
+        if True:
+            string = ""
             self.common_data_bus.busy = False
             
             # Execute Function 
@@ -35,11 +41,15 @@ class Simulation():
                         reservation_station.op.operand2 = reservation_station.vk
                         reservation_station.op.execute()  # Execute the operation
                         reservation_station.op.execution_time -= 1
+                        string += f"Executing {reservation_station.op.operation} in {reservation_station.name}\n"
+                        string += f"Execution time remaining: {reservation_station.op.execution_time}\n"
                         print(f"Executing {reservation_station.op.operation} in {reservation_station.name}")
                         print(f"Execution time remaining: {reservation_station.op.execution_time}")
                 elif reservation_station.busy and not self.common_data_bus.busy:
                     # Writeback Function
                     self.common_data_bus.busy = True
+                    string += f"Writing back {reservation_station.op.operation} in {reservation_station.name}\n"
+                    string += f"Result: {reservation_station.op.result}\n"
                     print(f"Writing back {reservation_station.op.operation} in {reservation_station.name}")
                     print(f"Result: {reservation_station.op.result}")
                     self.common_data_bus.value = reservation_station.op.result
@@ -59,7 +69,7 @@ class Simulation():
                 for reservation_station in self.reservation_stations:
                     if reservation_station.op.operation == instruction.op:
                         if not reservation_station.busy:
-                            self.instruction_queue.dequeue()
+                            self.instruction_queue.dequeue(instruction)
                             reservation_station.busy = True
                             reservation_station.op = FunctionalUnit(instruction.op, reservation_station.op.execution_time)
                             src1_index = int(instruction.src1[1:])  # Convert register name to index
@@ -81,17 +91,22 @@ class Simulation():
                             self.register_file.status[dest_index].Qi = reservation_station.name
                             break
 
-        
+            output = io.StringIO()
+            sys.stdout = output
             # Print Functions
             self.instruction_queue.print_instructions()
+            
             self.register_file.print_registers()
+
             self.register_file.print_registers_status()
             for reservation_station in self.reservation_stations:
                 reservation_station.print_reservation_station()
-
+            sys.stdout = sys.__stdout__
+            string += output.getvalue()
             
             
             self.cycles += 1
+            return string
 
 
         
