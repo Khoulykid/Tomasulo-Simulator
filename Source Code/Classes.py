@@ -71,7 +71,7 @@ class CommonDataBus: #Ali: debug to see if two operations write at the same time
         self.value = None
 
 class Instruction:
-    def __init__(self, op, dest, src1, src2=None):
+    def __init__(self, op, dest= None, src1=None, src2=None):
         self.op = op
         self.dest = dest
         self.src1 = src1

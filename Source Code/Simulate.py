@@ -21,6 +21,9 @@ class Simulation():
         self.potato = []
         self.total_cycles = 0
         self.IPC = 0
+        self.total_branches = 0
+        self.real_branches = 0
+        self.branch_out = 0
                 
     def set_memory(self, address, value):
         self.memory.store(address, value)
@@ -43,7 +46,7 @@ class Simulation():
             # the order of execute and fetch is flipped because i don't want to fetch then execute in the same cycle. 
             for reservation_station in self.reservation_stations:
                 if reservation_station.busy and reservation_station.op.execution_time != 0:
-                    if reservation_station.vj is not None and reservation_station.vk is not None:
+                    if (reservation_station.vj is not None and reservation_station.vk is not None) or reservation_station.op.operation == 'RET' or reservation_station.op.operation == 'CALL':
                         reservation_station.op.operand1 = reservation_station.vj
                         reservation_station.op.operand2 = reservation_station.vk
                         reservation_station.op.execute()  # Execute the operation
@@ -96,6 +99,7 @@ class Simulation():
                     elif reservation_station.op.operation == 'BEQ':
                         self.common_data_bus.value = reservation_station.op.result
                         if reservation_station.op.result == 1:
+                            self.real_branches += 1
                             self.instruction_queue.jump(reservation_station.a)
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
@@ -106,9 +110,7 @@ class Simulation():
                                 rs.vk = self.common_data_bus.value
                                 rs.qk = None
                     elif reservation_station.op.operation == 'RET':
-                        self.common_data_bus.value = self.register_file.registers[1].value
-                        self.register_file.status[reservation_station.dest].Qi = None
-                        self.instruction_queue.jump(reservation_station.a)
+                        self.instruction_queue.jump(self.register_file.registers[1].value)
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
@@ -118,10 +120,9 @@ class Simulation():
                                 rs.vk = self.common_data_bus.value
                                 rs.qk = None
                     elif reservation_station.op.operation == 'CALL':
-                        self.common_data_bus.value = reservation_station.qj + 1 # Ali: ALLLLIIIIIIIIIIIIIIIII
+                        self.common_data_bus.value = reservation_station.a + 1 # Ali: ALLLLIIIIIIIIIIIIIIIII
                         self.register_file.registers[1] = self.common_data_bus.value
-                        self.register_file.status[reservation_station.dest].Qi = None
-                        self.instruction_queue.jump(self.register_file.registers[reservation_station.vj].value)
+                        self.instruction_queue.jump(self.register_file.registers[reservation_station.vk])
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
@@ -155,24 +156,23 @@ class Simulation():
                             reservation_station.set_ID(instruction.ID)
                             reservation_station.busy = True
                             reservation_station.op = FunctionalUnit(instruction.op, reservation_station.op.execution_time)
-                            src1_index = int(instruction.src1[1:])  # Convert register name to index
-                            dest_index = int(instruction.dest[1:])  # Convert register name to index
-                            reservation_station.dest = dest_index
-                            if self.register_file.status[src1_index].Qi is None:
-                                reservation_station.vj = self.register_file.registers[src1_index].value
-                            else:
-                                reservation_station.qj = self.register_file.status[src1_index].Qi
+                            if instruction.op != "RET" and instruction.op != "CALL":
+                                src1_index = int(instruction.src1[1:])  # Convert register name to index
+                                dest_index = int(instruction.dest[1:])  # Convert register name to index
+                                reservation_station.dest = dest_index
+                                if self.register_file.status[src1_index].Qi is None:
+                                    reservation_station.vj = self.register_file.registers[src1_index].value
+                                else:
+                                    reservation_station.qj = self.register_file.status[src1_index].Qi
                             if instruction.op == 'BEQ':
                                 reservation_station.vk = self.register_file.registers[dest_index].value  # Treat src2 as an immediate value
+                                self.total_branches += 1
                                 print(dest_index)
                                 reservation_station.a = self.instruction_queue.current_index + int(instruction.src2)
                             if instruction.op == 'CALL':
-                                reservation_station.vj = 1
-                                reservation_station.a = self.instruction_queue.current_index
-                                reservation_station.vk = int(instruction.src1)
+                                reservation_station.vk = int(instruction.dest)
                             if instruction.op == 'RET':
-                                reservation_station.vj = 1
-                                reservation_station.a = self.instruction_queue.current_index
+                                reservation_station.vj = 0
                             elif instruction.op != 'BEQ' and instruction.op != 'CALL' and instruction.op != 'RET':
                                 if instruction.src2.isnumeric():
                                     reservation_station.vk = int(instruction.src2)
@@ -184,8 +184,9 @@ class Simulation():
                                         reservation_station.qk = self.register_file.status[src2_index].Qi
                             elif instruction.op == 'ADDI':
                                 reservation_station.vk = int(instruction.src2)
-                            dest_index = int(instruction.dest[1:])  # Convert register name to index
-                            if instruction.op != 'BEQ' :
+                            if instruction.op != 'RET' and instruction.op != 'CALL':
+                                dest_index = int(instruction.dest[1:])  # Convert register name to index
+                            if instruction.op != 'BEQ' and instruction.op != 'CALL' and instruction.op != 'RET':
                                 self.register_file.status[dest_index].Qi = reservation_station.name
                             for i in self.potato:
                                 if i["Inst"] == instruction.return_string():
@@ -206,6 +207,7 @@ class Simulation():
                     if i["Write"] is not None:
                         count += 1
                 self.IPC = count / self.total_cycles
+                self.branch_out = self.real_branches / self.total_branches
 
             output = io.StringIO()
             sys.stdout = output
@@ -224,7 +226,7 @@ class Simulation():
             
             
             self.cycles += 1
-            return string, self.potato, self.total_cycles, self.IPC
+            return string, self.potato, self.total_cycles, self.IPC, self.branch_out
 
 
         
