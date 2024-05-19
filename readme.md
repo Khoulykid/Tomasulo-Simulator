@@ -16,3 +16,8 @@ The user would not input values outside of scope for jumps (we implemented, but 
         
 ## What works:
 All instructions, but did not test thoroughly on them.
+
+## Errors:
+Did not check on all instructions thoroughly.
+
+We assumed 2 stations for RET and CALL
