@@ -43,15 +43,11 @@ class Simulation():
                         reservation_station.op.execution_time -= 1
                         string += f"Executing {reservation_station.op.operation} in {reservation_station.name}\n"
                         string += f"Execution time remaining: {reservation_station.op.execution_time}\n"
-                        print(f"Executing {reservation_station.op.operation} in {reservation_station.name}")
-                        print(f"Execution time remaining: {reservation_station.op.execution_time}")
                 elif reservation_station.busy and not self.common_data_bus.busy:
                     # Writeback Function
                     self.common_data_bus.busy = True
                     string += f"Writing back {reservation_station.op.operation} in {reservation_station.name}\n"
                     string += f"Result: {reservation_station.op.result}\n"
-                    print(f"Writing back {reservation_station.op.operation} in {reservation_station.name}")
-                    print(f"Result: {reservation_station.op.result}")
                     self.common_data_bus.value = reservation_station.op.result
                     self.register_file.status[reservation_station.dest].Qi = None
                     self.register_file.registers[reservation_station.dest].value = self.common_data_bus.value  # Update register file value
@@ -67,26 +63,31 @@ class Simulation():
             # FETCH Function
             for instruction in self.instruction_queue.instructions:
                 for reservation_station in self.reservation_stations:
-                    if reservation_station.op.operation == instruction.op:
+                    if reservation_station.op.operation == 'BEQ' and reservation_station.op.result == 1:
+                        self.instruction_queue.jump(reservation_station.vk)
+                    if reservation_station.op.operation == instruction.op or (reservation_station.op.operation == 'ADD' and instruction.op == 'ADDI'):
                         if not reservation_station.busy:
                             self.instruction_queue.dequeue(instruction)
                             reservation_station.busy = True
                             reservation_station.op = FunctionalUnit(instruction.op, reservation_station.op.execution_time)
                             src1_index = int(instruction.src1[1:])  # Convert register name to index
-                                                                    # This should be implemented above not here but ok for now 
                             dest_index = int(instruction.dest[1:])  # Convert register name to index
-                                                                    # This should be implemented above not here but ok for now 
                             reservation_station.dest = dest_index
                             if self.register_file.status[src1_index].Qi is None:
                                 reservation_station.vj = self.register_file.registers[src1_index].value
                             else:
                                 reservation_station.qj = self.register_file.status[src1_index].Qi
-                            if instruction.src2 is not None:
-                                src2_index = int(instruction.src2[1:])  # Convert register name to index
-                                if self.register_file.status[src2_index].Qi is None:
-                                    reservation_station.vk = self.register_file.registers[src2_index].value
+                            if instruction.op == 'BEQ':
+                                reservation_station.vk = int(instruction.src2)  # Treat src2 as an immediate value
+                            elif instruction.src2 is not None:
+                                if instruction.src2.isnumeric():
+                                    reservation_station.vk = int(instruction.src2)
                                 else:
-                                    reservation_station.qk = self.register_file.status[src2_index].Qi
+                                    src2_index = int(instruction.src2[1:])  # Convert register name to index
+                                    if self.register_file.status[src2_index].Qi is None:
+                                        reservation_station.vk = self.register_file.registers[src2_index].value
+                                    else:
+                                        reservation_station.qk = self.register_file.status[src2_index].Qi
                             dest_index = int(instruction.dest[1:])  # Convert register name to index
                             self.register_file.status[dest_index].Qi = reservation_station.name
                             break

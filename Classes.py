@@ -57,29 +57,28 @@ class Instruction:
     def print_instruction(self):
         print(f"{self.op}, {self.dest}, {self.src1}, {self.src2}")
 
-class InstructionQueue: 
+class InstructionQueue:
     def __init__(self):
         self.og = []
-        self.instructions = [
-            # Instruction('ADD', 'R5', 'R0', 'R1'),
-            # Instruction('ADD', 'R2', 'R5', 'R4') 
-        ]
+        self.instructions = []
+        self.current_index = 0
 
     def enqueue(self, instruction):
         self.instructions.append(instruction)
         self.og.append(instruction)
-    
-    def jump(self, index):
-        self.instructions = self.og[index:]
+
+    def jump(self, target_index):
+        if 0 <= target_index < len(self.og):
+            self.instructions = self.og[target_index:]
+            self.current_index = target_index
+
+        else:
+            self.instructions = []
 
     def dequeue(self, instruction):
         self.instructions.remove(instruction)
-         # I'm not sure this this dequeue removes the first instruction or the instruction just fetched 
-        #imagine a scenario where the reservation station is not empty, then i want to fetch the next instruction and dequeue the other instruction 
-        # check if the dequeue happens on the correct instruction not the first one
-        # i don't know the behavior of the lists in python 
+        self.current_index += 1
 
-        # return self.instructions.pop(0) if self.instructions else None
     def empty(self):
         return len(self.instructions) == 0
 
