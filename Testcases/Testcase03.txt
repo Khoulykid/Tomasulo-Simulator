@@ -1,5 +1,5 @@
-    BEQ R3, R0, 4
-    ADDI R3, R3, -1
-    ADDI R2, R0, R2
-    CALL 0 
-    SD R2, R4, 0   
+BEQ R3, R0, 4
+ADDI R3, R3, -1
+ADDI R2, R0, R2
+CALL 0 
+SD R2, R4, 0   

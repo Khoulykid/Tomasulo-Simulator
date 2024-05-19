@@ -15,10 +15,22 @@ class ReservationStation:
     def print_reservation_station(self):
         print(f"{self.name}: {self.busy}, {self.op.operation}, {self.vj}, {self.vk}, {self.qj}, {self.qk}, {self.a}, {self.op.execution_time}") # 
 
+    def reset(self):
+        self.busy = False
+        self.vj = None
+        self.vk = None
+        self.qj = None
+        self.qk = None
+        self.dest = None
+        self.a = None
+        self.op.execution_time = self.op.ogexec_time
+
+    
 class FunctionalUnit: 
     def __init__(self, operation, execution_time):
         self.operation = operation 
         self.execution_time = execution_time
+        self.ogexec_time = execution_time
         self.operand1 = None
         self.operand2 = None
         self.result = None
