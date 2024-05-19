@@ -51,6 +51,8 @@ class GUI:
         for i in range(len(lines)):
             address, value = lines[i].replace(" ", "").split(",")
             self.simulation.memory.store(int(address), int(value))
+            print(address, value)
+            print(self.simulation.memory.data[int(address)])
             
 
     def create_window(self):
@@ -94,7 +96,7 @@ class GUI:
         label3 = tk.Label(window, text="Output", bg="#1f2228", fg="white", font=("Arial", 20))
         label3.place(x= x//5, y= y*3.6)
 
-        self.mem_button = tk.Button(window, image=play_button_img, bg="#1f2a35", fg="white", font=("Arial", 12))
+        self.mem_button = tk.Button(window, image=play_button_img, bg="#1f2a35", command= self.mem_pressed, fg="white", font=("Arial", 12))
         self.mem_button.image = play_button_img
         self.mem_button.place(x= x*5, y= y//1.3)
         window.mainloop()
