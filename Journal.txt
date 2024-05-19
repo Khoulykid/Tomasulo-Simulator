@@ -1,0 +1,11 @@
+Moaz:
+    Implemented the classes and simulation class.
+    Implemented the initial simulation.
+    Implemented ADD, MUL and NAND functions
+    Implemented Reservation Stations, Functional Unit, Register File
+
+Ali:
+    Implemented the GUI
+    Connected the GUI with the backend
+    Edited in the Instruction Queue
+    Edited in the Simulation
