@@ -66,11 +66,8 @@ class Simulation():
                     string += f"Writing back {reservation_station.op.operation} in {reservation_station.name}\n"
                     string += f"Result: {reservation_station.op.result}\n"
                     for instruction in self.potato:
-                        if instruction["ID"] == reservation_station.ID:
-                            instruction["Write"] = self.cycles
-                    
-                    
-                    
+                                if instruction["ID"] == reservation_station.ID:
+                                    instruction["Write"] = self.cycles
                     if reservation_station.op.operation == 'LD':
                         self.common_data_bus.value = self.memory.load(reservation_station.a)
                         self.register_file.status[reservation_station.dest].Qi = None
@@ -146,12 +143,12 @@ class Simulation():
                             if rs.qk == reservation_station.name:
                                 rs.vk = self.common_data_bus.value
                                 rs.qk = None
+                    reservation_station.reset()
 
             flagbr = False
             # ISSUE Function
             for instruction in self.instruction_queue.instructions:
                 for reservation_station in self.reservation_stations:
-
                     if reservation_station.op.operation == instruction.op or (reservation_station.op.operation == 'ADD' and instruction.op == 'ADDI'):
                         if not reservation_station.busy:
                             self.instruction_queue.dequeue(instruction)
