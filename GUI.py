@@ -45,6 +45,14 @@ class GUI:
         inter = InstructionQueue()
         self.simulation = Simulation(inter)
 
+    def mem_pressed(self):
+        text = self.mem_field.get("1.0", "end-1c")
+        lines = text.split("\n")
+        for i in range(len(lines)):
+            address, value = lines[i].replace(" ", "").split(",")
+            self.simulation.memory.store(int(address), int(value))
+            
+
     def create_window(self):
         window = tk.Tk()
         window.title("MA")
