@@ -25,6 +25,7 @@ class GUI:
                 instruction = Instruction(inst, R[0])
             else:
                 instruction = Instruction(inst)
+            instruction.set_ID(i)
             self.InstructionQueue.enqueue(instruction)
         self.simulation.set_instruction_queue(self.InstructionQueue)
         
@@ -33,11 +34,17 @@ class GUI:
     def play_pressed(self):
         if not self.flag:
             self.divide_instruction(self.inst_field.get("1.0", "end-1c"))
-        string = self.simulation.simulate(self.flag)
+        string, potato = self.simulation.simulate(self.flag)
         self.output_field.configure(state="normal")
         self.output_field.delete("1.0", tk.END)
         self.output_field.insert(tk.END, string)
         self.output_field.configure(state="disabled")
+        self.state_field.configure(state="normal")
+        self.state_field.delete("1.0", tk.END)
+        potato_string = '\n'.join(map(str, potato))
+        self.state_field.insert(tk.END, potato_string)
+        self.state_field.configure(state="disabled")
+
 
 
     def stop_pressed(self):
@@ -67,6 +74,10 @@ class GUI:
         window.update()
         x = int(window.winfo_width() * 0.1)
         y = int(window.winfo_height() * 0.1)
+
+        self.state_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
+        self.state_field.place(x= x*5, y= y*4)
+        self.state_field.configure(state="disabled")
 
         self.inst_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
         self.inst_field.place(x= x//5, y= y*1.2)

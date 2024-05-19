@@ -18,10 +18,14 @@ class Simulation():
         self.instruction_queue = InstructionQueue
         self.register_file = RegisterFile(8)
         self.memory = Memory(128)
+        self.potato = []
+                
     def set_memory(self, address, value):
         self.memory.store(address, value)
     def set_instruction_queue(self, instructions):
         self.instruction_queue = instructions
+        for i in range(len(self.instruction_queue.instructions)):
+            self.potato.append({"ID": self.instruction_queue.instructions[i].ID, "Inst": self.instruction_queue.instructions[i].return_string(), "Issue": None, "Exec": None, "Write": None})
 
     
 
@@ -44,6 +48,10 @@ class Simulation():
                         reservation_station.op.execution_time -= 1
                         string += f"Executing {reservation_station.op.operation} in {reservation_station.name}\n"
                         string += f"Execution time remaining: {reservation_station.op.execution_time}\n"
+                        if reservation_station.op.execution_time == 0:
+                            for instruction in self.potato:
+                                if instruction["ID"] == reservation_station.ID:
+                                    instruction["Exec"] = self.cycles
                         if reservation_station.op.operation == 'LD': 
                             if reservation_station.op.execution_time == 4:
                                 reservation_station.a = reservation_station.op.result
@@ -55,6 +63,10 @@ class Simulation():
                     self.common_data_bus.busy = True
                     string += f"Writing back {reservation_station.op.operation} in {reservation_station.name}\n"
                     string += f"Result: {reservation_station.op.result}\n"
+                    for instruction in self.potato:
+                                if instruction["ID"] == reservation_station.ID:
+                                    instruction["Write"] = self.cycles
+                    
                     
                     if reservation_station.op.operation == 'LD':
                         self.common_data_bus.value = self.memory.load(reservation_station.a)
@@ -83,8 +95,8 @@ class Simulation():
                                 rs.qk = None
                     elif reservation_station.op.operation == 'BEQ':
                         self.common_data_bus.value = reservation_station.op.result
-                        self.instruction_queue.jump(1 + reservation_station.qk)
-                        print(reservation_station.vk + 1 + reservation_station.qk)
+                        self.instruction_queue.jump(1 + reservation_station.a + reservation_station.vk)
+                        print(1 + reservation_station.a)
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
@@ -96,7 +108,7 @@ class Simulation():
                     elif reservation_station.op.operation == 'RET':
                         self.common_data_bus.value = self.register_file.registers[1].value
                         self.register_file.status[reservation_station.dest].Qi = None
-                        self.instruction_queue.jump(self.common_data_bus.value)
+                        self.instruction_queue.jump(reservation_station.a)
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
@@ -140,6 +152,7 @@ class Simulation():
                     if reservation_station.op.operation == instruction.op or (reservation_station.op.operation == 'ADD' and instruction.op == 'ADDI'):
                         if not reservation_station.busy:
                             self.instruction_queue.dequeue(instruction)
+                            reservation_station.set_ID(instruction.ID)
                             reservation_station.busy = True
                             reservation_station.op = FunctionalUnit(instruction.op, reservation_station.op.execution_time)
                             src1_index = int(instruction.src1[1:])  # Convert register name to index
@@ -151,14 +164,14 @@ class Simulation():
                                 reservation_station.qj = self.register_file.status[src1_index].Qi
                             if instruction.op == 'BEQ':
                                 reservation_station.vk = int(instruction.src2)  # Treat src2 as an immediate value
-                                reservation_station.qk = self.instruction_queue.current_index
+                                reservation_station.a = self.instruction_queue.current_index
                             if instruction.op == 'CALL':
                                 reservation_station.vj = 1
-                                reservation_station.qj = self.instruction_queue.current_index
+                                reservation_station.a = self.instruction_queue.current_index
                                 reservation_station.vk = int(instruction.src1)
                             if instruction.op == 'RET':
                                 reservation_station.vj = 1
-                                reservation_station.qj = self.instruction_queue.current_index
+                                reservation_station.a = self.instruction_queue.current_index
                             elif instruction.src2 is not None:
                                 if instruction.src2.isnumeric():
                                     reservation_station.vk = int(instruction.src2)
@@ -170,6 +183,9 @@ class Simulation():
                                         reservation_station.qk = self.register_file.status[src2_index].Qi
                             dest_index = int(instruction.dest[1:])  # Convert register name to index
                             self.register_file.status[dest_index].Qi = reservation_station.name
+                            for i in self.potato:
+                                if i["Inst"] == instruction.return_string():
+                                    i["Issue"] = self.cycles
                             flagbr = True
                             break
                 if flagbr: break 
@@ -192,7 +208,7 @@ class Simulation():
             
             
             self.cycles += 1
-            return string
+            return string, self.potato
 
 
         

@@ -10,7 +10,10 @@ class ReservationStation:
         self.qk = None
         self.dest = None # this shouldn't be displayed in the print_reservation_station but i use it to write back 
         self.a = None
+        self.ID = None
 
+    def set_ID(self, ID):
+        self.ID = ID
 
     def print_reservation_station(self):
         print(f"{self.name}: {self.busy}, {self.op.operation}, {self.vj}, {self.vk}, {self.qj}, {self.qk}, {self.a}, {self.op.execution_time}") # 
@@ -61,6 +64,13 @@ class Instruction:
         self.dest = dest
         self.src1 = src1
         self.src2 = src2
+        self.ID = None
+
+    def return_string(self):
+        return f"{self.op}, {self.dest}, {self.src1}, {self.src2}"
+    
+    def set_ID(self, ID):
+        self.ID = ID
 
     def print_instruction(self):
         print(f"{self.op}, {self.dest}, {self.src1}, {self.src2}")
@@ -78,7 +88,7 @@ class InstructionQueue:
     def jump(self, target_index):
         if 0 <= target_index < len(self.og):
             self.instructions = self.og[target_index:]
-            self.current_index = target_index
+            self.current_index = 0
 
         else:
             self.instructions = []
