@@ -34,7 +34,7 @@ class GUI:
     def play_pressed(self):
         if not self.flag:
             self.divide_instruction(self.inst_field.get("1.0", "end-1c"))
-        string, potato, cycles, ipc = self.simulation.simulate(self.flag)
+        string, potato, cycles, ipc, branches = self.simulation.simulate(self.flag)
         self.output_field.configure(state="normal")
         self.output_field.delete("1.0", tk.END)
         self.output_field.insert(tk.END, string)
@@ -44,6 +44,7 @@ class GUI:
         potato_string = '\n'.join(map(str, potato))
         potato_string += f"\n\nTotal Cycles: {cycles}"
         potato_string += f"\t\tIPC: {ipc}"
+        potato_string += f"\t\tBranches: {branches}"
         self.state_field.insert(tk.END, potato_string)
         self.state_field.configure(state="disabled")
 
