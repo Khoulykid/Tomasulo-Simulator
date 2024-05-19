@@ -6,9 +6,10 @@ class Simulation():
         self.cycles = 0
         self.reservation_stations = [
             ReservationStation('LD'+str(i+1), 'LD', 6) for i in range(2)] + \
-            [ReservationStation('STORE', 'STORE', 6)] + \
+            [ReservationStation('SD', 'SD', 6)] + \
             [ReservationStation('BEQ', 'BEQ', 1)] + \
-            [ReservationStation('CALL/RET', 'CALL/RET', 1)] + \
+            [ReservationStation('CALL', 'CALL', 1)] + \
+            [ReservationStation('RET', 'RET', 1)] + \
             [ReservationStation('ADD'+str(i+1), 'ADD', 2) for i in range(4)] + \
             [ReservationStation('NAND'+str(i+1), 'NAND', 1) for i in range(2)] + \
             [ReservationStation('MUL', 'MUL', 8)
@@ -72,6 +73,31 @@ class Simulation():
                         self.common_data_bus.value = self.register_file.registers[reservation_station.dest].value
                         self.register_file.status[reservation_station.dest].Qi = None
                         self.memory.store(reservation_station.a,self.common_data_bus.value)   # Update register file value
+                        reservation_station.busy = False
+                        for rs in self.reservation_stations:
+                            if rs.qj == reservation_station.name:
+                                rs.vj = self.common_data_bus.value
+                                rs.qj = None
+                            if rs.qk == reservation_station.name:
+                                rs.vk = self.common_data_bus.value
+                                rs.qk = None
+                    elif reservation_station.op.operation == 'RET':
+                        self.common_data_bus.value = self.register_file.registers[reservation_station.dest].value
+                        self.register_file.status[reservation_station.dest].Qi = None
+                        self.instruction_queue.jump(self.common_data_bus.value)
+                        reservation_station.busy = False
+                        for rs in self.reservation_stations:
+                            if rs.qj == reservation_station.name:
+                                rs.vj = self.common_data_bus.value
+                                rs.qj = None
+                            if rs.qk == reservation_station.name:
+                                rs.vk = self.common_data_bus.value
+                                rs.qk = None
+                    elif reservation_station.op.operation == 'CALL':
+                        self.common_data_bus.value = # Ali: ALLLLIIIIIIIIIIIIIIIII
+                        self.register_file.registers[1] = self.common_data_bus.value
+                        self.register_file.status[reservation_station.dest].Qi = None
+                        self.instruction_queue.jump(self.register_file.registers[reservation_station.vj].value)
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
