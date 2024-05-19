@@ -23,10 +23,9 @@ class GUI:
                 instruction = Instruction(inst, R[0], R[1])
             self.InstructionQueue.enqueue(instruction)
         self.simulation.set_instruction_queue(self.InstructionQueue)
-        self.simulation.instruction_queue.print_instructions()
         
         
-            
+    
     def play_pressed(self):
         if not self.flag:
             self.divide_instruction(self.inst_field.get("1.0", "end-1c"))
@@ -35,6 +34,17 @@ class GUI:
         self.output_field.delete("1.0", tk.END)
         self.output_field.insert(tk.END, string)
         self.output_field.configure(state="disabled")
+
+
+    def stop_pressed(self):
+        self.flag = False
+        self.simulation.simulate(self.flag)
+        self.output_field.configure(state="normal")
+        self.output_field.delete("1.0", tk.END)
+        self.output_field.configure(state="disabled")
+        inter = InstructionQueue()
+        self.simulation = Simulation(inter)
+
     def create_window(self):
         window = tk.Tk()
         window.title("MA")
@@ -46,6 +56,11 @@ class GUI:
 
         self.inst_field = tk.Text(window, width= x//3, height = y//8, bg="#1f2a35", fg="white", font=("Arial", 12))
         self.inst_field.place(x= x//5, y= y*1.2)
+
+        stop_button_img = tk.PhotoImage(file="stop.png")
+        self.stop_button = tk.Button(window, image=stop_button_img, bg="#1f2a35", command=self.stop_pressed, fg="white", font=("Arial", 12))
+        self.stop_button.image = stop_button_img
+        self.stop_button.place(x= x//2.3, y= y//1.3)
 
 
         play_button_img = tk.PhotoImage(file="play.png")
@@ -63,7 +78,7 @@ class GUI:
         self.mem_field.place(x= x*5, y= y*1.2)
 
         label1 = tk.Label(window, text="Instruction Queue", bg="#1f2228", fg="white", font=("Arial", 18))
-        label1.place(x= x//2, y= y//1.3)
+        label1.place(x= x//1.1, y= y//1.3)
 
         label2 = tk.Label(window, text="Memory\nInput in this format: \"Address, Number\"", bg="#1f2228", fg="white", font=("Arial", 16))
         label2.place(x= x*5.4, y= y//1.7)
