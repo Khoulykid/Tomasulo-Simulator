@@ -1,0 +1,5 @@
+LD R2, R2, 500
+ADD R7, R0, R1
+NAND R3, R1, R2 
+MUL R5, R4, R5 
+RET 

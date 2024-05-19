@@ -1,10 +1,10 @@
-Moaz:
+Moaz: May 17th 
     Implemented the classes and simulation class.
     Implemented the initial simulation.
     Implemented ADD, MUL and NAND functions
     Implemented Reservation Stations, Functional Unit, Register File
 
-Ali:
+Ali: May 18th 
     Implemented the GUI
     Connected the GUI with the backend
     Edited in the Instruction Queue
