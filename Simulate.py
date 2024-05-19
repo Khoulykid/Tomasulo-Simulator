@@ -95,9 +95,8 @@ class Simulation():
                                 rs.qk = None
                     elif reservation_station.op.operation == 'BEQ':
                         self.common_data_bus.value = reservation_station.op.result
-                        self.instruction_queue.jump(reservation_station.a + reservation_station.vk)
-                        print(reservation_station.a + reservation_station.vk)
-                        print (reservation_station.a)
+                        if reservation_station.op.result == 1:
+                            self.instruction_queue.jump(reservation_station.a)
                         reservation_station.busy = False
                         for rs in self.reservation_stations:
                             if rs.qj == reservation_station.name:
@@ -164,8 +163,9 @@ class Simulation():
                             else:
                                 reservation_station.qj = self.register_file.status[src1_index].Qi
                             if instruction.op == 'BEQ':
-                                reservation_station.vk = int(instruction.src2)  # Treat src2 as an immediate value
-                                reservation_station.a = self.instruction_queue.current_index
+                                reservation_station.vk = self.register_file.registers[dest_index].value  # Treat src2 as an immediate value
+                                print(dest_index)
+                                reservation_station.a = self.instruction_queue.current_index + int(instruction.src2)
                             if instruction.op == 'CALL':
                                 reservation_station.vj = 1
                                 reservation_station.a = self.instruction_queue.current_index
@@ -173,7 +173,7 @@ class Simulation():
                             if instruction.op == 'RET':
                                 reservation_station.vj = 1
                                 reservation_station.a = self.instruction_queue.current_index
-                            elif instruction.src2 is not None:
+                            elif instruction.op != 'BEQ' and instruction.op != 'CALL' and instruction.op != 'RET':
                                 if instruction.src2.isnumeric():
                                     reservation_station.vk = int(instruction.src2)
                                 else:
@@ -182,8 +182,11 @@ class Simulation():
                                         reservation_station.vk = self.register_file.registers[src2_index].value
                                     else:
                                         reservation_station.qk = self.register_file.status[src2_index].Qi
+                            elif instruction.op == 'ADDI':
+                                reservation_station.vk = int(instruction.src2)
                             dest_index = int(instruction.dest[1:])  # Convert register name to index
-                            self.register_file.status[dest_index].Qi = reservation_station.name
+                            if instruction.op != 'BEQ' :
+                                self.register_file.status[dest_index].Qi = reservation_station.name
                             for i in self.potato:
                                 if i["Inst"] == instruction.return_string():
                                     i["Issue"] = self.cycles
@@ -212,7 +215,7 @@ class Simulation():
             self.instruction_queue.print_instructions()
             
             self.register_file.print_registers()
-
+            print(f"Mrmory Address 4: {self.memory.data[4]}")
             self.register_file.print_registers_status()
             for reservation_station in self.reservation_stations:
                 reservation_station.print_reservation_station()

@@ -16,7 +16,7 @@ class ReservationStation:
         self.ID = ID
 
     def print_reservation_station(self):
-        print(f"{self.name}: {self.busy}, {self.op.operation}, {self.vj}, {self.vk}, {self.qj}, {self.qk}, {self.a}, {self.op.execution_time}") # 
+        print(f"{self.name}: {self.busy}, {self.op.operation}, {self.vj}, {self.vk}, {self.qj}, {self.qk}, {self.a}, {self.op.execution_time}, {self.op.result}") # 
 
     def reset(self):
         self.busy = False
