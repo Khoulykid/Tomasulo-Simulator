@@ -41,6 +41,8 @@ class FunctionalUnit:
             self.result = self.operand1 + self.operand2
         elif self.operation == 'RET': 
             self.result = self.operand1
+        elif self.operation == 'CALL': 
+            self.result = self.operand1
         # Ali: add other operations here. 
         # Take care that Load/Store have address computations that should be written in reservation stations. 
         # make sure to solve the issue where there's two things writing to the same address 
